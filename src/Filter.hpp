@@ -23,10 +23,19 @@ public:
   Filter(RuleSet&& rules) : m_rules(std::move(rules)) {
   }
 
-  void filterPackets(std::string_view from, std::string_view to);
+  int start(std::string_view iface1, std::string_view iface2);
+
+  void stop();
+
+  ~Filter() {
+    stop();
+  }
 
 private:
   RuleSet m_rules;
+
+  int m_pid1 = 0;
+  int m_pid2 = 0;
 };
 
 } // namespace firewall

@@ -1,4 +1,5 @@
 #include "Exceptions.hpp"
+#include "Filter.hpp"
 #include "RuleSet.hpp"
 
 #include <cstring>
@@ -25,8 +26,23 @@ int main(int argc, char** argv)
     std::cerr << usage;
     return 1;
   }
-
   std::cerr << "Config is OK!\n";
+
+  firewall::Filter filter(std::move(rules));
+  res = filter.start(argv[1], argv[2]);
+  if (res < 0) {
+    std::cerr << "Failed to connect to interfaces\n";
+    std::cerr << usage;
+    return 1;
+  }
+  
+  std::string command;
+  while (std::cin >> command) {
+    if (command == "stop") {
+      filter.stop();
+      return 0;
+    }
+  }
 
   return 0;
 }

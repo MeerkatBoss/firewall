@@ -17,7 +17,6 @@
 
 #include "Packet.hpp"
 #include "Rule.hpp"
-
 namespace firewall {
 
 class RuleSet {
@@ -56,7 +55,7 @@ public:
     return Builder<Type::Blacklist>(set);
   }
 
-  bool acceptPacket(const Packet& packet);
+  bool acceptPacket(const Packet& packet) const;
 
 private:
   Type m_type = Type::Blacklist;

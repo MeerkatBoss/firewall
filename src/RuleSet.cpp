@@ -7,7 +7,7 @@
 
 namespace firewall {
 
-bool RuleSet::acceptPacket(const Packet& packet) {
+bool RuleSet::acceptPacket(const Packet& packet) const {
   for (const auto& rule : m_rules) {
     auto result = rule.matchPacket(packet);
     if (result == Rule::Result::Match) {
