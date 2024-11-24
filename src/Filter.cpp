@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <csignal>
-#include <stdexcept>
 
 #include <unistd.h>
 #include <sys/socket.h>
@@ -23,6 +22,7 @@ static int getIfaceSocket(std::string_view iface_name);
 static void filterWith(int from, int to, const RuleSet& rules);
 static size_t checkPacket(int from, const RuleSet& rules);
 static void forwardPacket(int from, int to, size_t size);
+static void skipPacket(int from);
 
 int Filter::start(std::string_view iface1, std::string_view iface2) {
   int fd1 = getIfaceSocket(iface1);
@@ -51,6 +51,7 @@ int Filter::start(std::string_view iface1, std::string_view iface2) {
 
   close(fd1);
   close(fd2);
+  return 0;
 }
 
 void Filter::stop() {
@@ -103,6 +104,9 @@ static void filterWith(int from, int to, const RuleSet& rules) {
     // If packet is accepted
     if (size > 0) {
       forwardPacket(from, to, size);
+    } else {
+      skipPacket(from);
+      puts("Blocked");
     }
   }
 }
@@ -135,7 +139,6 @@ static size_t checkPacket(int from, const RuleSet& rules) {
   packet.src_addr.s_addr = ip->saddr;
   packet.dst_addr.s_addr = ip->daddr;
   
-  int proto = ip->protocol;
   if (ip->protocol == IPPROTO_ICMP) {
     packet.protocol = Protocol::ICMP;
     packet.src_port = 0;
@@ -181,6 +184,23 @@ static void forwardPacket(int from, int to, size_t size) {
     assert(res == (int) byte_count);
 
     remaining -= byte_count;
+  }
+}
+
+static void skipPacket(int from) {
+  static constexpr size_t BufferSize = 4096;
+  static char buffer[BufferSize];
+  int size = recv(from, buffer, 0, MSG_TRUNC);
+  assert(size > 0);
+
+  size_t remaining = size;
+
+  while (remaining > 0) {
+    size_t batch = std::min(BufferSize, remaining);
+    int res = read(from, buffer, batch);
+    assert(res > 0);
+
+    remaining -= res;
   }
 }
 

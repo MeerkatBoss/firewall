@@ -1,3 +1,3 @@
 #!/bin/sh
 
-g++ src/*.cpp -o nat-hole-punch
+g++ src/*.cpp -o firewall

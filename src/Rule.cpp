@@ -122,7 +122,7 @@ static uint16_t portFromString(std::string_view port) {
     throw std::invalid_argument(std::string(port));
   }
 
-  return result;
+  return htons(result);
 }
 
 } // namespace firewall
