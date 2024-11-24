@@ -47,6 +47,20 @@ public:
   Result matchPacket(const Packet& packet) const;
 
 private:
+  Rule(Type type, in_addr ip) :
+    m_type(type),
+    m_ip(ip) {
+  }
+
+  Rule(Type type, Protocol protocol) :
+    m_type(type),
+    m_protocol(protocol) {
+  }
+
+  Rule(Type type, uint16_t port) :
+    m_type(type),
+    m_port(port) {
+  }
 
   Type m_type;
   union {
